@@ -19,7 +19,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class CRIPEX16 extends javax.swing.JFrame implements Runnable{
 Thread h1;
 int a=256,b;
-public String TXT,CR="",CR2="",NAME="",contenido="",encoded,decoded,HASHM,HASHS;
+public String TXT,CR="",CR2="",NAME="",contenido="",encoded,decoded,HASHM,HASHS,DATALEIDA="";
 boolean read=false,abrirf=false,abriri=false,FKEY=false,CRIP=false,DCRIP=false;
 double A,K,X0,R1=0.0,G=18.0,M;
     public CRIPEX16() {
@@ -115,11 +115,6 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jLabel1.setText("HASH MD5");
 
         jTextField3.setToolTipText("Contraceña para la encriptacion");
-        jTextField3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField3ActionPerformed(evt);
-            }
-        });
 
         Random_Key.setText("R.KEY");
         Random_Key.setToolTipText("Se crea una contraceña con una longitud especifica");
@@ -185,6 +180,8 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jCheckBox1.setSelected(true);
         jCheckBox1.setText("HASH");
         jCheckBox1.setToolTipText("Habilirar o desabilitar la creacion o lectura de HASH");
+        jCheckBox1.setEnabled(false);
+        jCheckBox1.setFocusable(false);
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jCheckBox1ActionPerformed(evt);
@@ -273,9 +270,19 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jMenu5.setText("Generar HASH de archivos");
 
         jMenuItem8.setText("MD5");
+        jMenuItem8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem8ActionPerformed(evt);
+            }
+        });
         jMenu5.add(jMenuItem8);
 
         jMenuItem9.setText("SHA1");
+        jMenuItem9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem9ActionPerformed(evt);
+            }
+        });
         jMenu5.add(jMenuItem9);
 
         jMenu4.add(jMenu5);
@@ -439,6 +446,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
         return (int)(RESUL);
     }
     public void Abriri() throws IOException{
+        DATALEIDA="";
         jLabel3.setText("ABRIENDO IMAGEN");
         jLabel3.setForeground(Color.YELLOW);
         jTextArea1.setText("");
@@ -465,9 +473,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jTextField1.setText(path);
         String HX,D="";
         try{
-            n=PNG.getTileWidth();
-        }catch(Exception e){
-        }
+        n=PNG.getTileWidth();
         HX="";
         int Tam=0,z=0;
         DATO=PNG.getRGB(0, 0);
@@ -482,7 +488,9 @@ double A,K,X0,R1=0.0,G=18.0,M;
                 if(x==0&&y==0)
                     y=1;
                 DATO=PNG.getRGB(y, x);
+                
                 HX=Integer.toHexString(DATO);
+                
                 D=D+HX.substring(2, 8).toUpperCase();
                 z++;
             }
@@ -502,7 +510,9 @@ double A,K,X0,R1=0.0,G=18.0,M;
                 HASH(HX,"MD5");
             else
                 HASH(HX,"SHA1");
-        jTextArea1.setText(D);
+        DATALEIDA=D;
+            System.err.println(DATALEIDA);
+        }catch(Exception e){}
         jLabel3.setText("LISTO");
         jLabel3.setForeground(Color.GREEN);
     }
@@ -552,20 +562,32 @@ double A,K,X0,R1=0.0,G=18.0,M;
                     x=1;
                 f+=3;
                 if(true){
-                    if(f<LE+3)
-                        A1=Integer.toHexString(VAL[f-3]);
+                    if(f<LE+3){
+                        if(VAL[f-3]<16)
+                            A1="0"+Integer.toHexString(VAL[f-3]);
+                        else
+                            A1=Integer.toHexString(VAL[f-3]);
+                    }
                     else{
                         Ran=(int)(Math.random()*255);
                         A1=Integer.toHexString(Ran);
                     }
-                    if(f<LE+2)
-                        A2=Integer.toHexString(VAL[f-2]);
+                    if(f<LE+2){
+                        if(VAL[f-2]<16)
+                            A2="0"+Integer.toHexString(VAL[f-2]);
+                        else
+                            A2=Integer.toHexString(VAL[f-2]);
+                    }
                     else{
                         Ran=(int)(Math.random()*255);
                         A2=Integer.toHexString(Ran);
                     }
-                    if(f<LE+1)
-                        A3=Integer.toHexString(VAL[f-1]);
+                    if(f<LE+1){
+                        if(VAL[f-1]<16)
+                            A3="0"+Integer.toHexString(VAL[f-1]);
+                        else
+                            A3=Integer.toHexString(VAL[f-1]);
+                    }
                     else{
                         Ran=(int)(Math.random()*255);
                         A3=Integer.toHexString(Ran);
@@ -600,38 +622,6 @@ double A,K,X0,R1=0.0,G=18.0,M;
             jTextField8.setText("0");
             HASHM="";
         }
-    }
-    public void Fkey(long tamaño,boolean ArchivoCompleto) throws IOException{
-        FKEY=false;
-        abrirArchivo = new JFileChooser();
-        FileInputStream fis;
-        DataInputStream entrada;
-        String path="";
-        abrirArchivo.setFileSelectionMode( JFileChooser.FILES_ONLY );
-        int seleccion = abrirArchivo.showOpenDialog( this );
-        if( seleccion == JFileChooser.APPROVE_OPTION ){
-            File f = abrirArchivo.getSelectedFile();
-            try{
-                if(ArchivoCompleto)
-                    tamaño=f.length();
-                path = f.getAbsolutePath();
-            }catch( Exception exp){}
-        }
-        try {
-            fis = new FileInputStream(path);
-            entrada = new DataInputStream(fis);
-            
-            for(int x=0;x<tamaño;x++){
-                contenido=contenido+String.valueOf(entrada.read());
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        } 
-        if(jCheckBox1.isSelected())
-            if(jRadioButton5.isSelected())
-                HASH(contenido,"MD5");
-            else
-                HASH(contenido,"SHA1");
     }
     public int DatoHex(int Dato,int DatoRandom,int DatoAterior){
         int temp=Dato+DatoRandom+DatoAterior;
@@ -740,6 +730,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jLabel3.setForeground(Color.GREEN);
     }
     public void AbrirF() throws IOException{
+        DATALEIDA="";
         jLabel3.setText("ABRIRENDO ARCHIVO");
         jLabel3.setForeground(Color.YELLOW);
         abrirf=false;
@@ -754,6 +745,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
         String path="",name="";
         abrirArchivo.setFileSelectionMode( JFileChooser.FILES_ONLY );
         long s=0;
+        double temp;
         int seleccion = abrirArchivo.showOpenDialog( this );
         if( seleccion == JFileChooser.APPROVE_OPTION ){
             File f = abrirArchivo.getSelectedFile();
@@ -764,27 +756,48 @@ double A,K,X0,R1=0.0,G=18.0,M;
                 name=name.substring(0, name.length()-7);
             }catch( Exception exp){}
         }
-        int HASHINT[]=new int[(int)s];
+        int HASHINT[]=new int[65500];
         try {
             fis = new FileInputStream(path);
             entrada = new DataInputStream(fis);
             jTextField1.setText(path);
-            int Dat,x=0;
+            int Dat;
+            long x=0,T=s/1000,F=0;
+            StringBuilder SW_Datos_Leidos;
+            SW_Datos_Leidos=new StringBuilder(50000);
+            jProgressBar1.setMaximum(1000);
             while( ( Dat = entrada.read()) != -1){
-                if(jCheckBox1.isSelected())
-                    HASHINT[x]=Dat;
+                if(jCheckBox1.isSelected()&&x<49999)
+                    HASHINT[(int)x]=Dat;
                 x++;
-                if(Dat<16)
-                    jTextArea1.setText(jTextArea1.getText().concat("0"+Integer.toHexString(Dat)).toUpperCase());
-                else
-                    jTextArea1.setText(jTextArea1.getText().concat(Integer.toHexString(Dat)).toUpperCase());  
+                if(s>=1000){
+                    F=(x%T==0)?F+1:F;
+                    jProgressBar1.setValue((int)F);
+                }
+                //System.err.println(F+" "+x);
+                
+                if(Dat<16){
+                    SW_Datos_Leidos=SW_Datos_Leidos.append(("0"+Integer.toHexString(Dat)).toUpperCase());
+                    if(x%49999==0){
+                        DATALEIDA=DATALEIDA+(SW_Datos_Leidos.toString());
+                        SW_Datos_Leidos.delete(0, 49999);
+                    }
+                }
+                else{
+                    SW_Datos_Leidos=SW_Datos_Leidos.append((Integer.toHexString(Dat)).toUpperCase());
+                    if(x%49999==0){
+                        DATALEIDA=DATALEIDA+(SW_Datos_Leidos.toString());
+                        SW_Datos_Leidos.delete(0, 49999);
+                    }
+                }
             }
+            if(s%49999>0)
+                DATALEIDA=DATALEIDA+(SW_Datos_Leidos.toString());
             entrada.close();
-            HASHINT[x]=Dat;
-            if(Dat<16)
-                jTextArea1.setText(jTextArea1.getText().concat("0"+Integer.toHexString(Dat)).toUpperCase());
-            else
-                jTextArea1.setText(jTextArea1.getText().concat(Integer.toHexString(Dat)).toUpperCase()); 
+//            if(Dat<16)
+//                DATALEIDA=DATALEIDA+(("0"+Integer.toHexString(Dat)).toUpperCase());
+//            else
+//                DATALEIDA=DATALEIDA+((Integer.toHexString(Dat)).toUpperCase());
         }catch (Exception e) {
             System.out.println(e.getMessage());
         } 
@@ -796,42 +809,44 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jLabel3.setText("LISTO");
         jLabel3.setForeground(Color.GREEN);
         jTextField5.setText(name);
-        
     }
     public void Dcrip(){
         DCRIP=false;
         jLabel3.setText("DESENCRIPTANDO");
         jLabel3.setForeground(Color.YELLOW);
-        if(jTextArea1.getText().length()==0)
+        if(DATALEIDA.length()==0)
             JOptionPane.showMessageDialog(rootPane, "No hay datos", "Error", 0);
         else{
-            String XD=jTextArea1.getText();
             jTextArea1.setText("");
             int DDR=0,G1=0,G2;
-            String GG=XD;
             jTextField7.setText(String.valueOf(jTextArea1.getText().length()));
             int CRY,VAL=0,TEMP=0;
             G1=0;
             G2=2;
-            for(int x=0;x<(GG.length()/2);x++){
-                CRY=Integer.parseInt(GG.substring(G1, G2),16);
+            StringBuilder SB=new StringBuilder(50000);
+            for(int x=0;x<(DATALEIDA.length()/2);x++){
+                CRY=Integer.parseInt(DATALEIDA.substring(G1, G2),16);
                 DDR=Random();
                 VAL=DatoHexDec(CRY, DDR, TEMP);
                 TEMP=CRY;
                 G1+=2;
                 G2+=2;
-                jTextArea1.setText(jTextArea1.getText().concat(String.valueOf((char)VAL)));
+                SB.append(String.valueOf((char)VAL));
+                if(x%49999==0){
+                    jTextArea1.setText(jTextArea1.getText().concat(SB.toString()));
+                    SB.delete(0, 49999);
+                }
+            }
+            if((DATALEIDA.length()/2)%49999>0){
+                jTextArea1.setText(jTextArea1.getText().concat(SB.toString()));
             }
             jTextField8.setText(String.valueOf(jTextArea1.getText().length()));
         }
         jLabel3.setText("LISTO");
         jLabel3.setForeground(Color.GREEN);
     }
-    private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField3ActionPerformed
-
     private void D_CripActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_D_CripActionPerformed
+        
         h1 = new Thread(this);
         h1.start();
         DCRIP=true;
@@ -926,6 +941,20 @@ double A,K,X0,R1=0.0,G=18.0,M;
         if(!IMG.isVisible())
             IMG.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
+        HASHFile HF=new HASHFile();
+        HF.setVisible(true);
+        HF.setTitle("HASH MD5");
+        HF.HASH="MD5";
+    }//GEN-LAST:event_jMenuItem8ActionPerformed
+
+    private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed
+        HASHFile HF=new HASHFile();
+        HF.setVisible(true);
+        HF.setTitle("HASH SHA1");
+        HF.HASH="SHA1";
+    }//GEN-LAST:event_jMenuItem9ActionPerformed
     public void CLS(){
         jTextArea1.setText("");
         jTextField1.setText("");

@@ -1,7 +1,13 @@
-
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /*
@@ -14,15 +20,26 @@ import javax.swing.JOptionPane;
  *
  * @author Andres
  */
-public class HASHFile extends javax.swing.JFrame {
-
+public class HASHFile extends javax.swing.JFrame implements Runnable{
+    public String HASH="MD5";
     /**
      * Creates new form HASHFile
      */
     public HASHFile() {
         initComponents();
     }
-
+    public void run(){
+        try {
+            if(!ArchivoCompleto)
+                Fkey(Integer.parseInt(jTextField1.getText()),false,HASH);
+            else
+                Fkey(-1,true,HASH);
+        }catch(IOException ex) {
+            Logger.getLogger(HASHFile.class.getName()).log(Level.SEVERE, null, ex);
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(null, "ERROR\nInerte solo datos numericos", "ERROR", 0);
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -37,8 +54,8 @@ public class HASHFile extends javax.swing.JFrame {
         jCheckBox1 = new javax.swing.JCheckBox();
         jTextField2 = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
+        jProgressBar1 = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
 
         jButton1.setText("Abrir");
@@ -49,6 +66,8 @@ public class HASHFile extends javax.swing.JFrame {
         });
 
         jCheckBox1.setText("Leer todo");
+        jCheckBox1.setEnabled(false);
+        jCheckBox1.setFocusable(false);
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jCheckBox1ActionPerformed(evt);
@@ -61,17 +80,18 @@ public class HASHFile extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(jCheckBox1))
-                    .addComponent(jTextField2))
+                    .addComponent(jTextField2, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -86,29 +106,88 @@ public class HASHFile extends javax.swing.JFrame {
                     .addComponent(jLabel1))
                 .addGap(18, 18, 18)
                 .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
     boolean ArchivoCompleto=false;
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        jTextField1.setEnabled(false);
-        ArchivoCompleto=true;
-    }//GEN-LAST:event_jCheckBox1ActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        CRIPEX16 FILE=new CRIPEX16();
-        try {
-            if(!ArchivoCompleto)
-                FILE.Fkey(Integer.parseInt(jTextField1.getText()),false);
-            else
-                FILE.Fkey(-1,true);
-        }catch(IOException ex) {
-            Logger.getLogger(HASHFile.class.getName()).log(Level.SEVERE, null, ex);
-        }catch(Exception e){
-            JOptionPane.showMessageDialog(null, "ERROR\nInerte solo datos numericos", "ERROR", 0);
+        if(jCheckBox1.isSelected()){
+            if(JOptionPane.showConfirmDialog(null, "Si selecciona todo el archivo, el proceso puede ser demaciado largo")==0){
+                jTextField1.setEnabled(false);
+                ArchivoCompleto=true;
+            }else
+                jCheckBox1.setSelected(false);
+        }else{
+            ArchivoCompleto=false;
+            jTextField1.setEnabled(true);
         }
+    }//GEN-LAST:event_jCheckBox1ActionPerformed
+    public void HASH(String Hash,String Modo) throws IOException{
+        MessageDigest m = null;
+        try {
+            m = MessageDigest.getInstance(Modo);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(CRIPEX16.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        m.reset();
+        m.update(Hash.getBytes());
+        byte[] digest = m.digest();
+        BigInteger bigInt = new BigInteger(1,digest);
+        String hashtext = bigInt.toString(16);
+        while(hashtext.length() < 32 ){
+            hashtext = "0"+hashtext;
+        }
+        jTextField2.setText(hashtext.toUpperCase());
+    }
+    public void Fkey(long tamaño,boolean ArchivoCompleto,String HASH) throws IOException{
+        String contenido="";
+        JFileChooser abrirArchivo = new JFileChooser();
+        FileInputStream fis;
+        DataInputStream entrada;
+        String path="";
+        jProgressBar1.setMaximum((int)tamaño);
+        abrirArchivo.setFileSelectionMode( JFileChooser.FILES_ONLY );
+        int seleccion = abrirArchivo.showOpenDialog( this ),x;
+        if( seleccion == JFileChooser.APPROVE_OPTION ){
+            File f = abrirArchivo.getSelectedFile();
+            try{
+                if(ArchivoCompleto){
+                    tamaño=f.length();
+                }
+                path = f.getAbsolutePath();
+            }catch( Exception exp){}
+        }
+        try {
+            fis = new FileInputStream(path);
+            entrada = new DataInputStream(fis);
+            StringBuilder SB=new StringBuilder(50000);
+            for(x=0;x<tamaño;x++){
+                SB.append(entrada.read());
+                if(x%50000==0){
+                    contenido=contenido+String.valueOf(SB.toString());
+                    SB.delete(0, 49999);
+                }
+                jProgressBar1.setValue(x);
+            }
+            if(x%50000!=0)
+                contenido=contenido+String.valueOf(SB.toString());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        } 
+        if(HASH.equals("MD5"))
+            HASH(contenido,"MD5");
+        else
+            HASH(contenido,"SHA1");
+        jProgressBar1.setValue(0);
+    }
+    Thread H;
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        H=new Thread(this);
+        H.start();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -150,6 +229,7 @@ public class HASHFile extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
