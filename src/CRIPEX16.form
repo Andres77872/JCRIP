@@ -93,6 +93,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="HASH de texto"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem10ActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -291,6 +294,9 @@
       <Properties>
         <Property name="toolTipText" type="java.lang.String" value="Contrace&#xf1;a para la encriptacion"/>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>
+      </AuxValues>
     </Component>
     <Component class="javax.swing.JButton" name="Random_Key">
       <Properties>
@@ -319,6 +325,9 @@
       <Properties>
         <Property name="toolTipText" type="java.lang.String" value="Nombre del archivo o imagen"/>
       </Properties>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="9"/>
+      </AuxValues>
     </Component>
     <Component class="javax.swing.JButton" name="D_Crip">
       <Properties>

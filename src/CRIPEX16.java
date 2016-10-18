@@ -9,19 +9,21 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-public class CRIPEX16 extends javax.swing.JFrame implements Runnable{
-Thread h1;
-int a=256,b;
-public String TXT,CR="",CR2="",NAME="",contenido="",encoded,decoded,HASHM,HASHS,DATALEIDA="";
-boolean read=false,abrirf=false,abriri=false,FKEY=false,CRIP=false,DCRIP=false;
-double A,K,X0,R1=0.0,G=18.0,M;
+public class CRIPEX16 extends javax.swing.JFrame implements Runnable {
+    CRIP_IMG IMG=new CRIP_IMG();
+    METODOS OBJ=new METODOS();
+    Thread h1;
+    int a=256,b;
+    public String TXT,CR="",CR2="",NAME="",contenido="",encoded,decoded,HASHM,HASHS,DATALEIDA="";
+    boolean read=false,abrirf=false,abriri=false,FKEY=false,CRIP=false,DCRIP=false;
+    double A,K,X0,R1=0.0,G=18.0,M;
     public CRIPEX16() {
         initComponents();
     }
@@ -288,6 +290,11 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jMenu4.add(jMenu5);
 
         jMenuItem10.setText("HASH de texto");
+        jMenuItem10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem10ActionPerformed(evt);
+            }
+        });
         jMenu4.add(jMenuItem10);
 
         jMenuBar1.add(jMenu4);
@@ -415,35 +422,9 @@ double A,K,X0,R1=0.0,G=18.0,M;
         pack();
     }// </editor-fold>//GEN-END:initComponents
     JFileChooser abrirArchivo;
+    
     public String MD5(){
         return "";
-    }
-    public int Random(){
-        if(a==256){
-            a=hash(false);
-            b=hash(true);
-            K=b;
-            X0=((a&2)==0)?a+3:a;
-            A=5+(8*K);
-            M=Math.pow(2, G);
-        }
-        X0=(X0*A)%M;
-        R1=((X0/(M-1))*256);
-        return (int)R1;
-    }
-    public int hash(boolean T){
-        double RESUL=0.0;
-        if(T){
-            for(int x=0;x<jTextField5.getText().length();x++){
-                RESUL=((Math.pow(jTextField5.getText().charAt(x),2)+256+x+RESUL)%(256+x))/(256+x);
-            }
-        }else{
-            for(int x=0;x<jTextField3.getText().length();x++){
-                RESUL=((Math.pow(jTextField3.getText().charAt(x),2)+256+x+RESUL)%(256+x))/(256+x);
-            }
-        }
-        RESUL=RESUL*1000000;
-        return (int)(RESUL);
     }
     public void Abriri() throws IOException{
         DATALEIDA="";
@@ -480,7 +461,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
         HX=Integer.toHexString(DATO);
         Tam=Integer.parseInt(HX.substring(2, 8),16)/3;
         int T=Integer.parseInt(HX.substring(2, 8),16),TF;
-        int HASHINT[]=new int[T];
+        ArrayList<Integer>HASHINT=new ArrayList<Integer>();
         for(int x=0;x<n;x++){
             for(int y=0;y<n;y++){
                 if(z==Tam+1)
@@ -488,9 +469,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
                 if(x==0&&y==0)
                     y=1;
                 DATO=PNG.getRGB(y, x);
-                
                 HX=Integer.toHexString(DATO);
-                
                 D=D+HX.substring(2, 8).toUpperCase();
                 z++;
             }
@@ -507,11 +486,10 @@ double A,K,X0,R1=0.0,G=18.0,M;
         D=D.substring(0, D.length()-TF);
         if(jCheckBox1.isSelected())
             if(jRadioButton5.isSelected())
-                HASH(HX,"MD5");
+                HASH(HASHINT.toString(),"MD5");
             else
-                HASH(HX,"SHA1");
+                HASH(HASHINT.toString(),"SHA1");
         DATALEIDA=D;
-            System.err.println(DATALEIDA);
         }catch(Exception e){}
         jLabel3.setText("LISTO");
         jLabel3.setForeground(Color.GREEN);
@@ -528,77 +506,6 @@ double A,K,X0,R1=0.0,G=18.0,M;
             for(int x=0;x<16;x++)
                 BW.write(x);
         }
-    }
-    public void img(int []VAL) throws IOException{
-        String A1="",A2="",A3="",val;
-        int DD=(int)Math.sqrt((VAL.length/3)+1)+1;
-        int N1,N2,N3,LE;
-        LE=VAL.length;
-        if(LE<=255){
-            N1=LE;
-            A1=Integer.toHexString(N1);
-        }else if(LE>255||LE<65535){
-            N2=LE/256;
-            A2=Integer.toHexString(N2);
-            N1=LE-(N2*256);
-            A1=Integer.toHexString(N1);
-        }else if(LE>65535){;
-            N3=LE/65536;
-            A3=Integer.toHexString(N3);
-            N2=(LE-(N3*65536))/256;
-            A2=Integer.toHexString(N2);
-            N1=LE-(N3*65536)-(N2*256);
-            A1=Integer.toHexString(N1);
-        }
-        DD++;
-        BufferedImage image = new BufferedImage(DD, DD, BufferedImage.TYPE_INT_RGB);
-        val=A3+A2+A1;
-        int s=Integer.valueOf(val, 16);
-        image.setRGB(0, 0, s);
-        int f=0,Ran=0;
-        for(int y=0;y<DD;y++)
-            for(int x=0;x<DD;x++){
-                if(x==0&&y==0)
-                    x=1;
-                f+=3;
-                if(true){
-                    if(f<LE+3){
-                        if(VAL[f-3]<16)
-                            A1="0"+Integer.toHexString(VAL[f-3]);
-                        else
-                            A1=Integer.toHexString(VAL[f-3]);
-                    }
-                    else{
-                        Ran=(int)(Math.random()*255);
-                        A1=Integer.toHexString(Ran);
-                    }
-                    if(f<LE+2){
-                        if(VAL[f-2]<16)
-                            A2="0"+Integer.toHexString(VAL[f-2]);
-                        else
-                            A2=Integer.toHexString(VAL[f-2]);
-                    }
-                    else{
-                        Ran=(int)(Math.random()*255);
-                        A2=Integer.toHexString(Ran);
-                    }
-                    if(f<LE+1){
-                        if(VAL[f-1]<16)
-                            A3="0"+Integer.toHexString(VAL[f-1]);
-                        else
-                            A3=Integer.toHexString(VAL[f-1]);
-                    }
-                    else{
-                        Ran=(int)(Math.random()*255);
-                        A3=Integer.toHexString(Ran);
-                    }
-                    val=A1+A2+A3;
-                    s=Integer.valueOf(val,16);
-                    image.setRGB(x, y, s);
-                } 
-            }
-        File file = new File(NAME+".PNG");
-        ImageIO.write(image, "png", file);
     }
     public void HASH(String Hash,String Modo) throws IOException{
         MessageDigest m = null;
@@ -667,22 +574,23 @@ double A,K,X0,R1=0.0,G=18.0,M;
             NAME=jTextField5.getText();
         int CRY,VAL=0,DDR;
         String GG=jTextArea1.getText();
-        int[]HASHINT=new int[jTextArea1.getText().length()];
+        ArrayList<Integer>HASHINT=new ArrayList<Integer>();
         for(int x=0;x<jTextArea1.getText().length();x++){
             CRY=GG.charAt(x);
-            DDR=Random();
+            DDR=OBJ.Random();
             VAL=DatoHex(CRY,DDR,VAL);
             if(jRadioButton2.isSelected()){
                 file(VAL);
             }
-            HASHINT[x]=VAL;
+            HASHINT.add(VAL);
         }
         if(jRadioButton1.isSelected())
-            img(HASHINT);
+            OBJ.NAME=NAME;
+            OBJ.img(HASHINT);
         jTextField7.setText(String.valueOf(jTextArea1.getText().length()));
-        jTextField8.setText(String.valueOf(HASHINT.length));
+        jTextField8.setText(String.valueOf(HASHINT.size()));
         
-        if(jTextArea1.getText().length()==HASHINT.length){
+        if(jTextArea1.getText().length()==HASHINT.size()){
             jLabel2.setForeground(Color.green);
             jLabel2.setText("TRUE");
         }
@@ -692,9 +600,9 @@ double A,K,X0,R1=0.0,G=18.0,M;
         }
         if(jCheckBox1.isSelected())
             if(jRadioButton5.isSelected())
-                HASH(Arrays.toString(HASHINT),"MD5");
+                HASH(HASHINT.toString(),"MD5");
             else
-                HASH(Arrays.toString(HASHINT),"SHA1");
+                HASH(HASHINT.toString(),"SHA1");
         String ff=HASH_GENERADO.getText();
         HASH_GENERADO.setText(ff);
         jLabel3.setText("LISTO");
@@ -756,7 +664,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
                 name=name.substring(0, name.length()-7);
             }catch( Exception exp){}
         }
-        int HASHINT[]=new int[65500];
+        ArrayList<Integer>HASHINT=new ArrayList<Integer>();
         try {
             fis = new FileInputStream(path);
             entrada = new DataInputStream(fis);
@@ -767,15 +675,13 @@ double A,K,X0,R1=0.0,G=18.0,M;
             SW_Datos_Leidos=new StringBuilder(50000);
             jProgressBar1.setMaximum(1000);
             while( ( Dat = entrada.read()) != -1){
-                if(jCheckBox1.isSelected()&&x<49999)
-                    HASHINT[(int)x]=Dat;
+                if(jCheckBox1.isSelected())
+                    HASHINT.add(Dat);
                 x++;
                 if(s>=1000){
                     F=(x%T==0)?F+1:F;
                     jProgressBar1.setValue((int)F);
                 }
-                //System.err.println(F+" "+x);
-                
                 if(Dat<16){
                     SW_Datos_Leidos=SW_Datos_Leidos.append(("0"+Integer.toHexString(Dat)).toUpperCase());
                     if(x%49999==0){
@@ -794,21 +700,18 @@ double A,K,X0,R1=0.0,G=18.0,M;
             if(s%49999>0)
                 DATALEIDA=DATALEIDA+(SW_Datos_Leidos.toString());
             entrada.close();
-//            if(Dat<16)
-//                DATALEIDA=DATALEIDA+(("0"+Integer.toHexString(Dat)).toUpperCase());
-//            else
-//                DATALEIDA=DATALEIDA+((Integer.toHexString(Dat)).toUpperCase());
         }catch (Exception e) {
             System.out.println(e.getMessage());
         } 
         if(jCheckBox1.isSelected())
             if(jRadioButton5.isSelected())
-                HASH(Arrays.toString(HASHINT),"MD5");
+                HASH(HASHINT.toString(),"MD5");
             else
-                HASH(Arrays.toString(HASHINT),"SHA1");
+                HASH(HASHINT.toString(),"SHA1");
         jLabel3.setText("LISTO");
         jLabel3.setForeground(Color.GREEN);
         jTextField5.setText(name);
+        jProgressBar1.setValue(0);
     }
     public void Dcrip(){
         DCRIP=false;
@@ -826,7 +729,7 @@ double A,K,X0,R1=0.0,G=18.0,M;
             StringBuilder SB=new StringBuilder(50000);
             for(int x=0;x<(DATALEIDA.length()/2);x++){
                 CRY=Integer.parseInt(DATALEIDA.substring(G1, G2),16);
-                DDR=Random();
+                DDR=OBJ.Random();
                 VAL=DatoHexDec(CRY, DDR, TEMP);
                 TEMP=CRY;
                 G1+=2;
@@ -846,10 +749,10 @@ double A,K,X0,R1=0.0,G=18.0,M;
         jLabel3.setForeground(Color.GREEN);
     }
     private void D_CripActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_D_CripActionPerformed
-        
+        DCRIP=true;
         h1 = new Thread(this);
         h1.start();
-        DCRIP=true;
+        
     }//GEN-LAST:event_D_CripActionPerformed
 
     private void Random_KeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Random_KeyActionPerformed
@@ -936,25 +839,30 @@ double A,K,X0,R1=0.0,G=18.0,M;
         h1.start();
         read=true;
     }//GEN-LAST:event_jMenuItem6ActionPerformed
-    CripImagen IMG=new CripImagen();
+    
     private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
         if(!IMG.isVisible())
             IMG.setVisible(true);
     }//GEN-LAST:event_jMenuItem4ActionPerformed
 
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
-        HASHFile HF=new HASHFile();
+        HASHFILE HF=new HASHFILE();
         HF.setVisible(true);
         HF.setTitle("HASH MD5");
         HF.HASH="MD5";
     }//GEN-LAST:event_jMenuItem8ActionPerformed
 
     private void jMenuItem9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem9ActionPerformed
-        HASHFile HF=new HASHFile();
+        HASHFILE HF=new HASHFILE();
         HF.setVisible(true);
         HF.setTitle("HASH SHA1");
         HF.HASH="SHA1";
     }//GEN-LAST:event_jMenuItem9ActionPerformed
+
+    private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
+        HASH_TXT HT=new HASH_TXT();
+        HT.setVisible(true);
+    }//GEN-LAST:event_jMenuItem10ActionPerformed
     public void CLS(){
         jTextArea1.setText("");
         jTextField1.setText("");
@@ -1043,9 +951,9 @@ double A,K,X0,R1=0.0,G=18.0,M;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField3;
+    public static javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
-    private javax.swing.JTextField jTextField5;
+    public static javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField7;
     private javax.swing.JTextField jTextField8;
     // End of variables declaration//GEN-END:variables
